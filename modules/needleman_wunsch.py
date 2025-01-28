@@ -138,12 +138,3 @@ def needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score):
             j = prev_j
 
     return score, alignement1, alignement2
-
-# Test the function
-seq1 = 'ACGT'
-seq2 = 'AGT'
-identity_score = 1
-substitution_score = -1
-gap_score = -1
-
-needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score)
