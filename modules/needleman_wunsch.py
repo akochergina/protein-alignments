@@ -1,4 +1,7 @@
 import pandas
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 
 def score_i_j_alignment(i: chr, j: chr, identity_score, substitution_score, gap_score):
     """
@@ -89,6 +92,91 @@ def fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score,
 
     return matrix, arrow_matrix
 
+def plot_nw_matrix(matrix, arrow_matrix, seq1, seq2):
+    """
+    Visualize the Needleman-Wunsch matrix with arrows.
+
+    Parameters:
+    ----------
+    matrix : pandas.DataFrame
+        The filled matrix with scores.
+    arrow_matrix : pandas.DataFrame
+        The matrix of arrows indicating traceback paths.
+    seq1 : str
+        The first sequence (used for row labels).
+    seq2 : str
+        The second sequence (used for column labels).
+    """
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    # Convert matrix to numpy array, replacing None with 0
+    matrix_np = matrix.fillna(0).to_numpy()
+    
+    # Define labels for the axes (insert '-' at the beginning to account for initial gap)
+    row_labels = ['-'] + list(seq1)
+    col_labels = ['-'] + list(seq2)
+    
+    # Create a heatmap with custom labels
+    sns.heatmap(matrix_np.astype(float), annot=True, fmt=".0f", cmap="Blues", linewidths=0.5, 
+                ax=ax, cbar=False, xticklabels=col_labels, yticklabels=row_labels)
+    
+    ax.xaxis.set_ticks_position("top")
+    ax.xaxis.set_label_position("top")
+
+    #traceback index[0] = n, m
+    traceback_indexes = [(matrix.shape[0]-1, matrix.shape[1]-1)]
+    while traceback_indexes[-1] != (0, 0):
+        for prev_i, prev_j in arrow_matrix.at[traceback_indexes[-1][0], traceback_indexes[-1][1]]:
+            traceback_indexes.append((prev_i, prev_j))
+
+    # Draw arrows based on arrow_matrix
+    for i in range(matrix.shape[0]):
+        for j in range(matrix.shape[1]):
+            if arrow_matrix.at[i, j] is not None:
+                for prev_i, prev_j in arrow_matrix.at[i, j]:
+                    dx = prev_j - j  # X direction
+                    dy = prev_i - i  # Y direction
+
+                    # color is red if arrow is in traceback_indexes
+                    if ((prev_i, prev_j) in traceback_indexes and (i, j) in traceback_indexes):
+                        color = 'red'
+                    else:
+                        color = 'black'
+                    if dx == 0:
+                        ax.arrow(j + 0.5, i + 0.35, dx * 0.5, dy * 0.5, head_width=0.1, 
+                                 head_length=0.1, fc=color, ec=color)
+                    elif dy == 0:
+                        ax.arrow(j + 0.35, i + 0.5, dx * 0.5, dy * 0.5, head_width=0.1, 
+                                 head_length=0.1, fc=color, ec=color)
+                    else:
+                        ax.arrow(j + 0.35, i + 0.35, dx * 0.6, dy * 0.6, head_width=0.1, 
+                             head_length=0.1, fc=color, ec=color)
+    
+    ax.set_title("Needleman-Wunsch Alignment Matrix with Traceback Arrows")
+    plt.show()
+
+def print_nw_result(matrix, arrow_matrix, score, alignment1, alignment2, seq1, seq2):
+    '''
+    Print the Needleman-Wunsch result.
+
+    Parameters:
+    ----------
+    matrix : pandas.DataFrame
+        The filled matrix.
+    arrow_matrix : pandas.DataFrame
+        The matrix of arrows. In matrix_arrows[i, j] we store the indexes of the cells where we can go from cell i, j.
+    score : int
+        The score of the alignment.
+    alignment1 : str
+        The first aligned sequence.
+    alignment2 : str
+        The second aligned sequence.
+    '''
+    print(f"Alignment was made with Needleman-Wunsch algorithm. Score is {score}.")
+    print(f"Alignment is: \n{alignment1}\n{alignment2}")
+    plot_nw_matrix(matrix, arrow_matrix, seq1, seq2)
+    return
+
 def needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score):
     """
     Perform Needleman-Wunsch alignment.
@@ -133,5 +221,7 @@ def needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score):
                 alignement2 = seq2[j-1] + alignement2
             i = prev_i
             j = prev_j
+    
+    print_nw_result(matrix, arrow_matrix, score, alignement1, alignement2, seq1, seq2)
 
     return score, alignement1, alignement2
