@@ -112,9 +112,6 @@ def needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score):
         A tuple containing the aligned sequences and a score.
     """
     matrix, arrow_matrix = fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score, gap_score)
-
-    print(matrix)
-    print(arrow_matrix)
     
     score = matrix.at[len(seq1), len(seq2)]
 

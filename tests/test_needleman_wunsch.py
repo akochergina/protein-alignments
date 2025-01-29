@@ -1,14 +1,13 @@
-import pytest
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join('..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from modules.needleman_wunsch import needleman_wunsch
-from Bio import pairwise2  
+from Bio import pairwise2 
 
 
 def test_needleman_wunsch_basic():
     """
-    Проверяем, корректно ли работает алгоритм на простом примере.
+    Check Needleman-Wunsch alignment on a basic example.
     """
     seq1 = "ACGT"
     seq2 = "AGT"
@@ -18,13 +17,13 @@ def test_needleman_wunsch_basic():
 
     score, align1, align2 = needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score)
 
-    # Ожидаемые результаты
-    assert score == 1  # Примерное значение, зависит от логики твоего алгоритма
+    assert score == 1  
     assert len(align1) == len(align2)
+    print(f"Alignment is: \n{align1}\n{align2}")
 
 def test_needleman_wunsch_vs_biopython():
     """
-    Сравниваем наш алгоритм с Biopython.
+    Compare our implementation of Needleman-Wunsch with Biopython.
     """
     seq1 = "ACGT"
     seq2 = "AGT"
@@ -32,12 +31,18 @@ def test_needleman_wunsch_vs_biopython():
     substitution_score = -1
     gap_score = -2
 
-    # Наш алгоритм
+    
     score, align1, align2 = needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score)
 
     # Biopython
     alignments = pairwise2.align.globalms(seq1, seq2, identity_score, substitution_score, gap_score, gap_score)
     biopython_score = alignments[0].score
 
-    # Проверяем, что наши результаты совпадают
     assert abs(score - biopython_score) < 1e-6
+    assert align1 == alignments[0].seqA
+    assert align2 == alignments[0].seqB
+    print(f"Alignment is: \n{align1}\n{align2}")
+    print(f"Biopython alignment is: \n{alignments[0].seqA}\n{alignments[0].seqB}")
+
+
+test_needleman_wunsch_basic()
