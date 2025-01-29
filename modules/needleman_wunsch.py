@@ -2,10 +2,12 @@ import pandas
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+from Bio.Align import substitution_matrices
 
-def score_i_j_alignment(i: chr, j: chr, identity_score, substitution_score):
+
+def score_i_j_alignment(i: chr, j: chr, blosum_m: bool, identity_score=1, substitution_score=-1):
     """
-    Calculate the score of aligning characters i and j.
+    Calculate the score of aligning characters i and j. If blosum_m is True, we use BLOSUM62 matrix.
 
     Parameters:
     ----------
@@ -13,6 +15,8 @@ def score_i_j_alignment(i: chr, j: chr, identity_score, substitution_score):
         First character to align.
     j : chr
         Second character to align.
+    blosum_m : bool
+        If True, we use BLOSUM62 matrix.
     identity_score : int
         Score for aligning identical characters.
     substitution_score : int
@@ -23,6 +27,10 @@ def score_i_j_alignment(i: chr, j: chr, identity_score, substitution_score):
     score : int
         The score of aligning i and j.
     """
+    if blosum_m:
+        matrix = substitution_matrices.load("BLOSUM62")
+        return int(matrix[(i, j)])
+
     if i == j:
         return identity_score
     else:
@@ -114,7 +122,7 @@ def print_nw_result(matrix, arrow_matrix, score, alignment1, alignment2, seq1, s
     plot_nw_matrix(matrix, arrow_matrix, seq1, seq2)
     return
 
-def fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score, gap_opening_score, gap_extension_score):
+def fill_needleman_wunsch_matrix(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1):
     '''
     Fill the Needleman-Wunsch matrix and store the indexes of the arrows with possibility to have up to 3 arrows.
 
@@ -124,12 +132,16 @@ def fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score,
         First sequence to align.
     seq2 : str
         Second sequence to align.
+    blosum_m : bool
+        If True, we use BLOSUM62 matrix.
+    gap_opening_score : int
+        Score for opening a gap.
+    gap_extension_score : int
+        Score for extending a gap.
     identity_score : int
         Score for aligning identical characters.
     substitution_score : int
         Score for aligning non-identical characters.
-    gap_score : int
-        Score for introducing a gap.
 
     Returns:
     -------
@@ -162,7 +174,10 @@ def fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score,
     for i in range(1, rows):
         for j in range(1, cols):
             # Calculate the scores
-            match = matrix.at[i-1, j-1] + score_i_j_alignment(seq1[i-1], seq2[j-1], identity_score, substitution_score)
+            if blosum_m:
+                match = matrix.at[i-1, j-1] + score_i_j_alignment(seq1[i-1], seq2[j-1], blosum_m)
+            else:
+                match = matrix.at[i-1, j-1] + score_i_j_alignment(seq1[i-1], seq2[j-1], blosum_m, identity_score, substitution_score)
             if gap_matrix.at[i-1, j] == 1:
                 delete = matrix.at[i-1, j] + gap_extension_score
             else:
@@ -188,7 +203,7 @@ def fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score,
 
     return matrix, arrow_matrix
 
-def needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_opening_score, gap_extension_score):
+def needleman_wunsch(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1):
     """
     Perform Needleman-Wunsch alignment.
 
@@ -198,19 +213,26 @@ def needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_opening
         First sequence to align.
     seq2 : str
         Second sequence to align.
+    blosum_m : bool
+        If True, we use BLOSUM62 matrix.
+    gap_opening_score : int
+        Score for opening a gap.
+    gap_extension_score : int
+        Score for extending a gap.
     identity_score : int
         Score for aligning identical characters.
     substitution_score : int
         Score for aligning non-identical characters.
-    gap_score : int
-        Score for introducing a gap.
 
     Returns:
     -------
     alignment : tuple
         A tuple containing the aligned sequences and a score.
     """
-    matrix, arrow_matrix = fill_needleman_wunsch_matrix(seq1, seq2, identity_score, substitution_score, gap_opening_score, gap_extension_score)
+    if blosum_m:
+        matrix, arrow_matrix = fill_needleman_wunsch_matrix(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score)
+    else:
+        matrix, arrow_matrix = fill_needleman_wunsch_matrix(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score)
     
     score = matrix.at[len(seq1), len(seq2)]
 
