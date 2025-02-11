@@ -23,7 +23,7 @@ def mat_distances(liste_de_sequences, blosum_m, gap_opening_score, gap_extension
   for i in range(len(liste_de_sequences)):
     for j in range(len(liste_de_sequences)):
       if j>=i:
-        score=nw(liste_de_sequences[i], liste_de_sequences[j], blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score)[0]
+        score=nw([liste_de_sequences[i], liste_de_sequences[j]], blosum_m, gap_opening_score, gap_extension_score, identity_score=identity_score, substitution_score=substitution_score)[0]
         matD[i][j]=score
         matD[j][i]=matD[i][j]
   return matD
