@@ -203,7 +203,7 @@ def fill_needleman_wunsch_matrix(seq1, seq2, blosum_m, gap_opening_score, gap_ex
 
     return matrix, arrow_matrix
 
-def needleman_wunsch(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1):
+def needleman_wunsch(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1, visualisation=False):
     """
     Perform Needleman-Wunsch alignment.
 
@@ -255,7 +255,8 @@ def needleman_wunsch(seq1, seq2, blosum_m, gap_opening_score, gap_extension_scor
             i = prev_i
             j = prev_j
     
-    print_nw_result(matrix, arrow_matrix, score, alignement1, alignement2, seq1, seq2)
+    if visualisation:
+        print_nw_result(matrix, arrow_matrix, score, alignement1, alignement2, seq1, seq2)
 
     return score, alignement1, alignement2
 

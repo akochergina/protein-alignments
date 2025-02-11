@@ -14,8 +14,11 @@ def test_needleman_wunsch_basic():
     identity_score = 1
     substitution_score = -1
     gap_score = -2
+    blosum_m=False
+    gap_opening_score = gap_score
+    gap_extension_score = gap_score
 
-    score, align1, align2 = needleman_wunsch(seq1, seq2, identity_score, substitution_score, gap_score)
+    score, align1, align2 = needleman_wunsch(seq1, seq2, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score, visualisation=True)
 
     assert score == 1  
     assert len(align1) == len(align2)
