@@ -36,6 +36,37 @@ def score_i_j_alignment(i: chr, j: chr, blosum_m: bool, identity_score=1, substi
     else:
         return substitution_score
 
+def score_i_j_alignment_multidim(i, alignements, blosum_m: bool, gap_score, identity_score=1, substitution_score=-1):
+    """
+    Calculate the score of aligning character i with list of characters written in alignements. If blosum_m is True, we use BLOSUM62 matrix.
+
+    Parameters:
+    ----------
+    i : chr
+        One character to align with others.
+    alignements : list of chr
+        Already aligned characters.
+    blosum_m : bool
+        If True, we use BLOSUM62 matrix.
+    gap_score : int
+        The score of opening a gap. 
+    identity_score : int
+        Score for aligning identical characters.
+    substitution_score : int
+        Score for aligning non-identical characters.
+
+    Returns:
+    -------
+    score : int
+        The score of aligning i and j.
+    """
+    score = 0
+    for c in alignements:
+        if c == '-':
+            score += gap_score
+        else:
+            score += score_i_j_alignment(i, c, blosum_m, identity_score, substitution_score)
+    return score / len(alignements)
 
 def plot_nw_matrix(matrix, arrow_matrix, sequence):
     """
