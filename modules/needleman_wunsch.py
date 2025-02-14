@@ -289,9 +289,9 @@ def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_sc
         A tuple containing the aligned sequences and a score.
     """
     if blosum_m:
-        matrix, arrow_matrix = fill_needleman_wunsch_matrix_multidim(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score)
+        matrix, arrow_matrix = fill_needleman_wunsch_matrix(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score)
     else:
-        matrix, arrow_matrix = fill_needleman_wunsch_matrix_multidim(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score)
+        matrix, arrow_matrix = fill_needleman_wunsch_matrix(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score)
     
     score = matrix.at[len(sequence), len(previous_alignment[0])]
 
@@ -323,3 +323,37 @@ def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_sc
         print_nw_result(matrix, arrow_matrix, score, previous_alignment, sequences)
 
     return score, previous_alignment
+
+def needleman_wunsch(sequences, blosum_m, gap_opening_score, gap_extension_score, print_result=False, identity_score=1, substitution_score=-1):
+    """
+    Perform Needleman-Wunsch alignment.
+
+    Parameters:
+    ----------
+    sequences : list of str
+        Sequences to align.
+    blosum_m : bool
+        If True, we use BLOSUM62 matrix.
+    gap_opening_score : int
+        Score for opening a gap.
+    gap_extension_score : int
+        Score for extending a gap.
+    print_result : bool
+        If True, print the matrix.
+    identity_score : int
+        Score for aligning identical characters.
+    substitution_score : int
+        Score for aligning non-identical characters.
+
+    Returns:
+    -------
+    alignment : tuple
+        A tuple containing the aligned sequences and a score.
+    """
+    previous_alignment = [sequences[0]]
+    previous_score = 0
+
+    for i in range(2, len(sequences)):
+        previous_score, previous_alignment = needleman_wunsch_step(sequences[i], previous_alignment, blosum_m, gap_opening_score, gap_extension_score, print_result, identity_score, substitution_score)
+    
+    return previous_score, previous_alignment
