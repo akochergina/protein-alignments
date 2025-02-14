@@ -79,7 +79,8 @@ def plot_nw_matrix(matrix, arrow_matrix, sequences):
     arrow_matrix : pandas.DataFrame
         The matrix of arrows indicating traceback paths.
     sequences : list of str
-        List of sequences to align.
+        List of sequences to align. Sequences[0] is the sequence on the vertical axis, and Sequences[1], Sequences[2], etc is 
+        the sequence on the horizontal axis (up to 5 are printed).
     """
     fig, ax = plt.subplots(figsize=(8, 6))
     
@@ -89,6 +90,10 @@ def plot_nw_matrix(matrix, arrow_matrix, sequences):
     # Define labels for the axes (insert '-' at the beginning to account for initial gap)
     row_labels = ['-'] + list(sequences[0])
     col_labels = ['-'] + list(sequences[1])
+
+    for i in range(1, len(col_labels)):
+        for j in range(2, min(len(sequences), 6)):
+            col_labels[i] = col_labels[i] + '\n' + sequences[j][i-1]
     
     # Create a heatmap with custom labels
     sns.heatmap(matrix_np.astype(float), annot=True, fmt=".0f", cmap="Blues", linewidths=0.5, 
