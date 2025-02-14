@@ -170,14 +170,16 @@ def print_nw_result(matrix, arrow_matrix, score, alignments, sequences):
     plot_nw_matrix(matrix, arrow_matrix, sequences)
     return
 
-def fill_needleman_wunsch_matrix(sequences, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1):
+def fill_needleman_wunsch_matrix(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1):
     '''
     Fill the Needleman-Wunsch matrix and store the indexes of the arrows with possibility to have up to 3 arrows.
 
     Parameters:
     ----------
-    sequences : list of str
-        List containing sequences to align.
+    sequence :  str
+        Sequences to align with the previous alignment.
+    previous_alignment : list of str
+        Some sequences already aligned.
     blosum_m : bool
         If True, we use BLOSUM62 matrix.
     gap_opening_score : int
@@ -195,8 +197,9 @@ def fill_needleman_wunsch_matrix(sequences, blosum_m, gap_opening_score, gap_ext
         The filled matrix.
     '''
     # Initialize the matrix
-    rows = len(sequences[0]) + 1
-    cols = len(sequences[1]) + 1
+    rows = len(sequence) + 1
+    cols = len(previous_alignment[0]) + 1
+
     matrix = pandas.DataFrame(index=range(rows), columns=range(cols))
     arrow_matrix = pandas.DataFrame(index=range(rows), columns=range(cols))
     gap_matrix = pandas.DataFrame(index=range(rows), columns=range(cols))
@@ -216,14 +219,22 @@ def fill_needleman_wunsch_matrix(sequences, blosum_m, gap_opening_score, gap_ext
         arrow_matrix.at[0, j] = [(0, j-1)]
         gap_matrix.at[0, j] = 1
 
+
     # Fill the matrix 
     for i in range(1, rows):
         for j in range(1, cols):
             # Calculate the scores
+            chr_alignment = [previous_alignment[k][j-1] for k in range(len(previous_alignment))]
             if blosum_m:
-                match = matrix.at[i-1, j-1] + score_i_j_alignment(sequences[0][i-1], sequences[1][j-1], blosum_m)
+                if gap_matrix.at[i-1, j] == 1:
+                    match = matrix.at[i-1, j-1] + score_i_j_alignment_multidim(sequence[i-1], chr_alignment, blosum_m, gap_extension_score)
+                else:
+                    match = matrix.at[i-1, j-1] + score_i_j_alignment_multidim(sequence[i-1], chr_alignment, blosum_m, gap_opening_score)
             else:
-                match = matrix.at[i-1, j-1] + score_i_j_alignment(sequences[0][i-1], sequences[1][j-1], blosum_m, identity_score, substitution_score)
+                if gap_matrix.at[i-1, j] == 1:
+                    match = matrix.at[i-1, j-1] + score_i_j_alignment_multidim(sequence[i-1], chr_alignment, blosum_m, gap_extension_score, identity_score, substitution_score)
+                else:
+                    match = matrix.at[i-1, j-1] + score_i_j_alignment_multidim(sequence[i-1], chr_alignment, blosum_m, gap_opening_score, identity_score, substitution_score)
             if gap_matrix.at[i-1, j] == 1:
                 delete = matrix.at[i-1, j] + gap_extension_score
             else:
@@ -249,14 +260,16 @@ def fill_needleman_wunsch_matrix(sequences, blosum_m, gap_opening_score, gap_ext
 
     return matrix, arrow_matrix
 
-def needleman_wunsch(sequences, blosum_m, gap_opening_score, gap_extension_score, print_result=False, identity_score=1, substitution_score=-1):
+def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score, print_result=False, identity_score=1, substitution_score=-1):
     """
     Perform Needleman-Wunsch alignment.
 
     Parameters:
     ----------
-    sequences : list of str
-        List containing sequences to align.
+    sequence : str
+        One sequence to align with the previous alignment.
+    previous_alignment : list of str
+        Some sequences already aligned.
     blosum_m : bool
         If True, we use BLOSUM62 matrix.
     gap_opening_score : int
@@ -276,37 +289,37 @@ def needleman_wunsch(sequences, blosum_m, gap_opening_score, gap_extension_score
         A tuple containing the aligned sequences and a score.
     """
     if blosum_m:
-        matrix, arrow_matrix = fill_needleman_wunsch_matrix(sequences, blosum_m, gap_opening_score, gap_extension_score)
+        matrix, arrow_matrix = fill_needleman_wunsch_matrix_multidim(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score)
     else:
-        matrix, arrow_matrix = fill_needleman_wunsch_matrix(sequences, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score)
+        matrix, arrow_matrix = fill_needleman_wunsch_matrix_multidim(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score)
     
-    score = matrix.at[len(sequences[0]), len(sequences[1])]
+    score = matrix.at[len(sequence), len(previous_alignment[0])]
 
-    alignments = []
 
     alignement1 = ''
     alignement2 = ''
-    i = len(sequences[0])
-    j = len(sequences[1])
+    i = len(sequence)
+    j = len(previous_alignment[0])
 
     while i > 0 or j > 0:
         for prev_i, prev_j in arrow_matrix.at[i, j]:
             if i - prev_i == 1 and j - prev_j == 1:
-                alignement1 = sequences[0][i-1] + alignement1
-                alignement2 = sequences[1][j-1] + alignement2
+                alignement1 = sequence[i-1] + alignement1
+                alignement2 = previous_alignment[0][j-1] + alignement2
             elif i - prev_i == 1:
-                alignement1 = sequences[0][i-1] + alignement1
+                alignement1 = sequence[i-1] + alignement1
                 alignement2 = '-' + alignement2
             else:
                 alignement1 = '-' + alignement1
-                alignement2 = sequences[1][j-1] + alignement2
+                alignement2 = previous_alignment[0][j-1] + alignement2
             i = prev_i
             j = prev_j
     
-    alignments.append(alignement1)
-    alignments.append(alignement2)
+    sequences = [sequence] + previous_alignment
+    previous_alignment.insert(0, alignement1)
+    
     
     if print_result:
-        print_nw_result(matrix, arrow_matrix, score, alignments, sequences)
+        print_nw_result(matrix, arrow_matrix, score, previous_alignment, sequences)
 
-    return score, alignments
+    return score, previous_alignment
