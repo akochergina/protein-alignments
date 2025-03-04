@@ -47,6 +47,7 @@ def UPGMA(liste_de_sequences, blosum_m, gap_opening_score, gap_extension_score, 
     sortie : un arbre de clusters"""
 
     matD=mat_distances(liste_de_sequences, blosum_m, gap_opening_score, gap_extension_score, identity_score, substitution_score) #matrice de distance entre chaque paire de séquence
+    print(matD)
     clusters=[Tree(val=[i]) for i in range(len(liste_de_sequences))] #liste de cluster, chaque cluster étant un arbre
     mind = float('inf')
     while len(clusters)>1:
@@ -55,6 +56,8 @@ def UPGMA(liste_de_sequences, blosum_m, gap_opening_score, gap_extension_score, 
         for i in range(len(clusters)):
             for j in range(i+1,len(clusters)):
                 dij=inter_cluster_dist(clusters[i].val,clusters[j].val,matD)
+                #print(i,j)
+                #print(dij)
                 if dij<mind :
                     mind=dij
                     min_i=i
@@ -65,6 +68,6 @@ def UPGMA(liste_de_sequences, blosum_m, gap_opening_score, gap_extension_score, 
         clusters.pop(min_i)
         clusters.append(new_cluster)
     tree_of_seq=clusters[0]
-    tree_of_seq.print_tree()
+    tree_of_seq.print_tree_sequences(liste_de_sequences)
     return tree_of_seq
 
