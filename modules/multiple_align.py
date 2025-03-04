@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from modules.nw_multiple import needleman_wunsch_multiple as nwm
 from modules.UPGMA import UPGMA
 
-print_results=True
+print_results=False
 
 
 def rec_align_tree(tree_of_indexes,list_of_seq, blosum_m, gap_opening_score, gap_extension_score,print_result, identity_score, substitution_score):
@@ -60,6 +60,7 @@ def align_multiple_sequences(list_of_seq, blosum_m, gap_opening_score, gap_exten
     alignement = rec_align_tree(upgma_tree, list_of_seq,blosum_m, gap_opening_score, gap_extension_score, print_results, identity_score, substitution_score)
 
     print("Multiple Alignement :", alignement)
+    return alignement
 
     
 
