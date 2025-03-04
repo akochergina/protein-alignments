@@ -18,18 +18,12 @@ def test_needleman_wunsch_basic():
     gap_opening_score = gap_score
     gap_extension_score = gap_score
 
-    score, align = needleman_wunsch([seq1, seq2], blosum_m, gap_opening_score, True, gap_extension_score, identity_score, substitution_score)
+    score, alignments = needleman_wunsch([seq1, seq2], blosum_m, gap_opening_score, True, gap_extension_score, identity_score, substitution_score)
 
-<<<<<<< Updated upstream
-    assert score == 1  
-    assert len(align[0]) == len(align[1])
-    print(f"Alignment is: \n{align[0]}\n{align[1]}")
-=======
     assert score == 0, f"Expected 1, got {score}"  
     assert len(alignments[0]) == len(alignments[1])
-    print_alignments(alignments)
+    #print_alignments(alignments)
     print("All tests passed for needleman_wunsch_basic \n")
->>>>>>> Stashed changes
 
 def test_needleman_wunsch_vs_biopython():
     """
