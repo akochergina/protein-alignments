@@ -260,7 +260,7 @@ def fill_needleman_wunsch_matrix(sequence, previous_alignment, blosum_m, gap_ope
 
     return matrix, arrow_matrix
 
-def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score, print_result=False, identity_score=1, substitution_score=-1):
+def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_score=-10, gap_extension_score=-2, print_result=False, identity_score=1, substitution_score=-1):
     """
     Perform Needleman-Wunsch alignment.
 
@@ -288,6 +288,7 @@ def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_sc
     alignment : tuple
         A tuple containing the aligned sequences and a score.
     """
+    
     if blosum_m:
         matrix, arrow_matrix = fill_needleman_wunsch_matrix(sequence, previous_alignment, blosum_m, gap_opening_score, gap_extension_score)
     else:
@@ -314,17 +315,26 @@ def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_sc
                 alignement2 = previous_alignment[0][j-1] + alignement2
             i = prev_i
             j = prev_j
-    
+
+
+    if len(alignement1) != len(alignement2):
+        max_length = max(len(alignement1), len(alignement2))
+        if len(alignement1) < max_length:
+            alignement1 = alignement1.ljust(max_length, '-')
+        else:
+            previous_alignment = [seq.ljust(max_length, '-') for seq in previous_alignment]
+
     sequences = [sequence] + previous_alignment
+    if len(previous_alignment) == 1:
+        previous_alignment = [alignement2]
     previous_alignment.insert(0, alignement1)
-    
-    
+
     if print_result:
         print_nw_result(matrix, arrow_matrix, score, previous_alignment, sequences)
 
     return score, previous_alignment
 
-def needleman_wunsch(sequences, blosum_m, gap_opening_score, gap_extension_score, print_result=False, identity_score=1, substitution_score=-1):
+def needleman_wunsch(sequences, blosum_m, gap_opening_score=-10, gap_extension_score=-2, print_result=False, identity_score=1, substitution_score=-1):
     """
     Perform Needleman-Wunsch alignment.
 
