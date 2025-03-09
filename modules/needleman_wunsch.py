@@ -303,18 +303,18 @@ def needleman_wunsch_step(sequence, previous_alignment, blosum_m, gap_opening_sc
     j = len(previous_alignment[0])
 
     while i > 0 or j > 0:
-        for prev_i, prev_j in arrow_matrix.at[i, j]:
-            if i - prev_i == 1 and j - prev_j == 1:
-                alignement1 = sequence[i-1] + alignement1
-                alignement2 = previous_alignment[0][j-1] + alignement2
-            elif i - prev_i == 1:
-                alignement1 = sequence[i-1] + alignement1
-                alignement2 = '-' + alignement2
-            else:
-                alignement1 = '-' + alignement1
-                alignement2 = previous_alignment[0][j-1] + alignement2
-            i = prev_i
-            j = prev_j
+        prev_i, prev_j = arrow_matrix.at[i, j][0]
+        if i - prev_i == 1 and j - prev_j == 1:
+            alignement1 = sequence[i-1] + alignement1
+            alignement2 = previous_alignment[0][j-1] + alignement2
+        elif i - prev_i == 1:
+            alignement1 = sequence[i-1] + alignement1
+            alignement2 = '-' + alignement2
+        else:
+            alignement1 = '-' + alignement1
+            alignement2 = previous_alignment[0][j-1] + alignement2
+        i = prev_i
+        j = prev_j
 
 
     if len(alignement1) != len(alignement2):
