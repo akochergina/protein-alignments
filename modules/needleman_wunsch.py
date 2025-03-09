@@ -350,8 +350,8 @@ def needleman_wunsch(sequences, blosum_m, gap_opening_score, gap_extension_score
     alignment : tuple
         A tuple containing the aligned sequences and a score.
     """
-    previous_alignment = [sequences[0]]
-    previous_score = 0
+    previous_score, previous_alignment = needleman_wunsch_step(sequences[1], [sequences[0]], blosum_m, gap_opening_score, gap_extension_score, print_result, identity_score, substitution_score)
+
 
     for i in range(2, len(sequences)):
         previous_score, previous_alignment = needleman_wunsch_step(sequences[i], previous_alignment, blosum_m, gap_opening_score, gap_extension_score, print_result, identity_score, substitution_score)
