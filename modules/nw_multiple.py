@@ -262,6 +262,12 @@ def needleman_wunsch_multiple(block1, block2, blosum_m, gap_opening_score=-10, g
     alignment : tuple
         A tuple containing the aligned sequences and a score.
     """
+    i = len(block1[0])
+    j = len(block2[0])
+    if i < j :
+        block1, block2 = block2, block1
+        i, j = j, i
+
     if blosum_m:
         matrix, arrow_matrix = fill_needleman_wunsch_matrix_multiple(block1, block2, blosum_m, gap_opening_score, gap_extension_score)
     else:
@@ -269,32 +275,37 @@ def needleman_wunsch_multiple(block1, block2, blosum_m, gap_opening_score=-10, g
     
     score = matrix.at[len(block1[0]), len(block2[0])]
 
+
     aa = [("") for i in range (len(block1))]
     bb = [("") for i in range (len(block2))]
-    i = len(block1[0])
-    j = len(block2[0])
 
     while i > 0 or j > 0:
-        for prev_i, prev_j in arrow_matrix.at[i, j]:
-            if i - prev_i == 1 and j - prev_j == 1:
-                for k in range (len(block1)):
-                    aa[k]+=(block1[k][i-1])
-                for k in range(len(block2)):
-                    bb[k]+=(block2[k][j-1])
-            elif i - prev_i == 1:
-                for k in range (len(block1)):
-                    aa[k]+=(block1[k][i-1])
-                for k in range(len(block2)):
-                    bb[k]+='-'
-            else:
-                for k in range (len(block1)):
-                    aa[k]+='-'
-                for k in range(len(block2)):
-                    bb[k]+=(block2[k][j-1])
-            i = prev_i
-            j = prev_j
+        prev_i, prev_j = arrow_matrix.at[i, j][0]
+        if i - prev_i == 1 and j - prev_j == 1:
+            for k in range(len(block1)):
+                if i > 0:  
+                    aa[k] += block1[k][i-1]  
+                else:
+                    aa[k] += '-'
+            for k in range(len(block2)):
+                if j > 0:
+                    bb[k] += block2[k][j-1]
+                else:
+                    bb[k] += '-'
+        elif i - prev_i == 1:
+            for k in range (len(block1)):
+                aa[k]+=(block1[k][i-1])
+            for k in range(len(block2)):
+                bb[k]+='-'
+        else:
+            for k in range (len(block1)):
+                aa[k]+='-'
+            for k in range(len(block2)):
+                bb[k]+=(block2[k][j-1])
+        i = prev_i
+        j = prev_j
     
-
+    
     for k in range (len(block1)):
       aa[k]=aa[k][::-1]
     for k in range(len(block2)):
