@@ -5,12 +5,14 @@ import numpy as np
 from Bio.Align import substitution_matrices
 
 
-""" Here the goal is to align two blocs of strings already aligned. Its the needleman wunsh algorithm adapted.
+""" 
+Here the goal is to align two blocs of strings already aligned. Its the needleman wunsh algorithm adapted.
 """
 
 
 def cost_function_block(list1, list2, blosum_m=False, identity_score=1, substitution_score=-1):
-    """ returns the cost of aligning two character lists
+    """ 
+    returns the cost of aligning two character lists
     Character lists represent the already aligned characters of the blocks
     Parameters:
     ------------
@@ -24,7 +26,8 @@ def cost_function_block(list1, list2, blosum_m=False, identity_score=1, substitu
         Score for aligning non-identical characters.
 
     Returns:
-    Score : int, associated score"""
+    Score : int, associated score
+    """
     score=0
     n=len(list1)
     m=len(list2)
@@ -66,7 +69,7 @@ def plot_nw_matrix_multiple(matrix, arrow_matrix, block1, block2):
     block 2 : list of str
         List containing sequences already aligned. Objective is now to align block1 and block2
     """
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(6, 4))
     
     # Convert matrix to numpy array, replacing None with 0
     matrix_np = matrix.fillna(0).to_numpy()
@@ -76,8 +79,6 @@ def plot_nw_matrix_multiple(matrix, arrow_matrix, block1, block2):
     col_labels = ['-'] + [ [block2[k][i] for k in range (len(block2))] for i in range (len(block2[0])) ]
     
     # Create a heatmap with custom labels
-    #sns.heatmap(matrix_np.astype(float), annot=True, fmt=".0f", cmap="Blues", linewidths=0.5, 
-    #            ax=ax, cbar=False, xticklabels=col_labels, yticklabels=row_labels)
     
     sns.heatmap(matrix_np.astype(float), annot=True, fmt=".0f", cmap="Blues", linewidths=0.5, 
                 ax=ax, cbar=False, xticklabels=col_labels, yticklabels=row_labels)
@@ -85,7 +86,6 @@ def plot_nw_matrix_multiple(matrix, arrow_matrix, block1, block2):
     ax.xaxis.set_ticks_position("top")
     ax.xaxis.set_label_position("top")
 
-    #traceback index[0] = n, m
     traceback_indexes = [(matrix.shape[0]-1, matrix.shape[1]-1)]
     while traceback_indexes[-1] != (0, 0):
         for prev_i, prev_j in arrow_matrix.at[traceback_indexes[-1][0], traceback_indexes[-1][1]]:
@@ -208,8 +208,6 @@ def fill_needleman_wunsch_matrix_multiple(block1, block2, blosum_m, gap_opening_
     for i in range(1, rows):
         for j in range(1, cols):
             # Calculate the scores
-            #print(i,j)
-            #print([(block1[k][i-1]) for k in range(len(block1))],[(block2[k][j-1]) for k in range (len(block2))])
             match = matrix.at[i-1, j-1] + cost_function_block([(block1[k][i-1]) for k in range(len(block1))],[(block2[k][j-1]) for k in range (len(block2))], blosum_m, identity_score, substitution_score)
             if gap_matrix.at[i-1, j] == 1:
                 delete = matrix.at[i-1, j] + gap_extension_score
@@ -236,7 +234,7 @@ def fill_needleman_wunsch_matrix_multiple(block1, block2, blosum_m, gap_opening_
 
     return matrix, arrow_matrix
 
-def needleman_wunsch_multiple(block1, block2, blosum_m, gap_opening_score, gap_extension_score, print_result=False, identity_score=1, substitution_score=-1):
+def needleman_wunsch_multiple(block1, block2, blosum_m, gap_opening_score=-10, gap_extension_score=-2, print_result=False, identity_score=1, substitution_score=-1):
     """
     Perform Needleman-Wunsch alignment, to align two blocks of already aligned sequences
 
@@ -277,12 +275,7 @@ def needleman_wunsch_multiple(block1, block2, blosum_m, gap_opening_score, gap_e
     j = len(block2[0])
 
     while i > 0 or j > 0:
-       # print(i,j)
-        #print(arrow_matrix.at[i, j])
         for prev_i, prev_j in arrow_matrix.at[i, j]:
-            #print(i,j)
-            #print(prev_i,prev_j)
-            #print (aa,bb)
             if i - prev_i == 1 and j - prev_j == 1:
                 for k in range (len(block1)):
                     aa[k]+=(block1[k][i-1])
