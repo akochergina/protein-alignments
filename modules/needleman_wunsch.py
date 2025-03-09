@@ -82,7 +82,7 @@ def plot_nw_matrix(matrix, arrow_matrix, sequences):
         List of sequences to align. Sequences[0] is the sequence on the vertical axis, and Sequences[1], Sequences[2], etc is 
         the sequence on the horizontal axis (up to 5 are printed).
     """
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(6, 4))
     
     # Convert matrix to numpy array, replacing None with 0
     matrix_np = matrix.fillna(0).to_numpy()
