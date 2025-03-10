@@ -28,20 +28,14 @@ def rec_align_tree(tree_of_indexes,list_of_seq, blosum_m, gap_opening_score, gap
     if tree_of_indexes.val is None:
         return []
     if len(tree_of_indexes.val)==1:
-        #print("base sequence : "+list_of_seq[tree_of_indexes.val[0]])
         return [list_of_seq[tree_of_indexes.val[0]]]
     else:
-        #print("aligning : ")
-        # Vérifie si self.val est une liste d'indices
-        #sequences = [list_of_seq[i] for i in tree_of_indexes.val]
-        #sequence_str = ", ".join(sequences)
-        #print("aligning : ", sequence_str)
         block1=rec_align_tree(tree_of_indexes.left, list_of_seq, blosum_m, gap_opening_score, gap_extension_score,print_result, identity_score, substitution_score)
         block2=rec_align_tree(tree_of_indexes.right, list_of_seq, blosum_m, gap_opening_score, gap_extension_score,print_result, identity_score, substitution_score)
         print( "aligning : ", block1, block2)
         return nwm(block1, block2, blosum_m, gap_opening_score, gap_extension_score,print_result, identity_score, substitution_score)[1]
 
-def align_multiple_sequences(list_of_seq, blosum_m, gap_opening_score, gap_extension_score, identity_score=1, substitution_score=-1):
+def align_multiple_sequences(list_of_seq, blosum_m, gap_opening_score=-10, gap_extension_score=-2, identity_score=1, substitution_score=-1):
     """
     Aligns multiple sequences using progressive alignment guided by a UPGMA tree.
 
